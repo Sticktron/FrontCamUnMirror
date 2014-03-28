@@ -21,7 +21,7 @@
 
 
 
-#define kMirrorButtonImagePath			@"/Library/Application Support/FCUM/mirror.png"
+#define kMirrorButtonImagePath			@"/Library/Application Support/FrontCamUnMirror/mirror.png"
 #define kMirrorButtonTitleMirrored		@"Mirrored"
 #define kMirrorButtonTitleUnMirrored	@"Un-Mirrored"
 #define kMirrorButtonFontName			@"DINAlternate-Bold"

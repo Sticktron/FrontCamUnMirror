@@ -1,4 +1,4 @@
-Package: com.sticktron.fcum
+Package: com.sticktron.frontcamunmirror
 Name: Front Cam Un-Mirror
 Depends: mobilesubstrate, firmware (>= 7.0)
 Version: 0.0.2
