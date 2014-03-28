@@ -25,6 +25,11 @@ This tweak is under development.
 * TODO: add support for Messages, SnapChat, ...
 * TODO: new button to "link" output to preview transformation
 
+## Beta Repo
+
+http://cydia.myrepospace.com/sticktron/
+
+
 ## Credits
 
 * Sticktron (@sticktron, /u/sticktron) - original author
