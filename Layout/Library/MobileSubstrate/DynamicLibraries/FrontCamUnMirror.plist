@@ -1,10 +1,7 @@
 {
 	Filter = {
 		Bundles = (
-			"com.apple.springboard",
-			"com.apple.camera",
-			"com.apple.MobileSMS",
-			"com.toyopagroup.picaboo"
+			"com.apple.PhotoLibrary",
 		);
 	};
 }
