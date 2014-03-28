@@ -1,0 +1,8 @@
+Package: com.sticktron.fcum
+Name: Front Cam Un-Mirror
+Depends: mobilesubstrate, firmware (>= 7.0)
+Version: 0.0.2
+Architecture: iphoneos-arm
+Description: Un-Mirror the Front Camera's Live Preview!
+Author: Sticktron
+Section: Tweaks
