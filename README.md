@@ -1,5 +1,4 @@
-FrontCamUnMirror
-================
+## FrontCamUnMirror
 
 Un-Mirror the Front Camera's Live Preview!
 
@@ -10,13 +9,13 @@ This tweak adds a toggle button to the UI when the front facing camera is active
 Licence:
 You may not use the source code for any commercial product without the original author's consent.
 
-## Device Compatibility
+### Device Compatibility
 
 * iOS 7
 * ARMv7, ARM64
 * Camera required ;)
 
-## Status
+### Status
 
 This tweak is under development.
 
@@ -26,13 +25,12 @@ This tweak is under development.
 * TODO: add support for Messages, SnapChat, ...
 * TODO: new button to "link" output to preview transformation
 
-## Beta Repo
+### Beta Repo
 
 http://cydia.myrepospace.com/sticktron/
 
 
-## Credits
+### Credits
 
-* Sticktron (@sticktron, /u/sticktron) - original author
 * /r/jailbreak/ community - idea, testing
-
+* Sticktron (@sticktron, /u/sticktron) - original author
