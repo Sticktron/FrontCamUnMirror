@@ -27,7 +27,7 @@ This tweak is under development.
 
 ### Beta Repo
 
-http://cydia.myrepospace.com/sticktron/
+http://cydia.sticktron.com
 
 
 ### Credits
