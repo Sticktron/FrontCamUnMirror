@@ -25,12 +25,8 @@ This tweak is under development.
 * TODO: add support for Messages, SnapChat, ...
 * TODO: new button to "link" output to preview transformation
 
-### Beta Repo
-
-http://cydia.sticktron.com
-
 
 ### Credits
 
 * /r/jailbreak/ community - idea, testing
-* Sticktron (@sticktron, /u/sticktron) - original author
+* Sticktron (@sticktron, /u/sticktron) - author
