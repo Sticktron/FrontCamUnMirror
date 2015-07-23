@@ -11,19 +11,15 @@ You may not use the source code for any commercial product without the original 
 
 ### Device Compatibility
 
-* iOS 7
-* ARMv7, ARM64
-* Camera required ;)
+* iOS 7.x - 8.x
+* All devices with a camera
 
-### Status
+### Status -- iOS 8 update incoming !!!
 
-This tweak is under development.
-
-* working: Camera App
-* working: SpringBoard (Lockscreen camera)
+* works in: Camera App, Lockscreen
 * TODO: handle landscape mode
-* TODO: add support for Messages, SnapChat, ...
 * TODO: new button to "link" output to preview transformation
+* TODO: add support for Messages?, SnapChat?, ...
 
 
 ### Credits
