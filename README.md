@@ -1,28 +1,32 @@
+### Status -- iOS 8 update incoming !!!
+
+
 ## FrontCamUnMirror
 
-Un-Mirror the Front Camera's Live Preview!
+Un-mirrors the front-facing camera's preview.
 
-When using the front-facing camera in iOS the preview is mirrored.
-The [r/jailbreak/](http://reddit.com/r/jailbreak/) community requested a way to toggle the mirroring on/off.
-This tweak adds a toggle button to the UI when the front facing camera is active.
+The built-in (native) camera software in iOS mirrors the preview screen (viewfinder) when taking selfies.
+Why? Because people are used to seeing themselves in a mirror in real life, so it seems more natural.
+Is the output also mirrored? No, the camera always captures and outputs exactly what it sees.
 
-Licence:
-You may not use the source code for any commercial product without the original author's consent.
+This tweak adds a new toolbar button when using the system camera UI and the front facing camera is active.
+
 
 ### Device Compatibility
 
 * iOS 7.x - 8.x
-* All devices with a camera
+* Any device with a camera
 
-### Status -- iOS 8 update incoming !!!
 
-* works in: Camera App, Lockscreen
+### TODOs
+
 * TODO: handle landscape mode
 * TODO: new button to "link" output to preview transformation
-* TODO: add support for Messages?, SnapChat?, ...
+* TODO: add support for other apps: Messages?, SnapChat?, ...
 
 
 ### Credits
 
-* /r/jailbreak/ community - idea, testing
-* Sticktron (@sticktron, /u/sticktron) - author
+Thanks to the /r/jailbreak community for the idea and testing.
+
+Copyright (C) 2014-2015 Sticktron. All rights reserved.
