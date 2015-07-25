@@ -1,21 +1,18 @@
-### Status -- iOS 8 update incoming !!!
-
-
 ## FrontCamUnMirror
 
 Un-mirrors the front-facing camera's preview.
 
-The built-in (native) camera software in iOS mirrors the preview screen (viewfinder) when taking selfies.
+The built-in camera software in iOS mirrors the preview screen (viewfinder) when taking selfies.
 Why? Because people are used to seeing themselves in a mirror in real life, so it seems more natural.
 Is the output also mirrored? No, the camera always captures and outputs exactly what it sees.
 
-This tweak adds a new toolbar button when using the system camera UI and the front facing camera is active.
+This tweak adds a button to the toolbar when using the system camera UI and the front facing camera is active.
 
 
 ### Device Compatibility
 
 * iOS 7.x - 8.x
-* Any device with a camera
+* Any device with a front camera
 
 
 ### TODOs
