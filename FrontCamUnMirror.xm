@@ -1,213 +1,223 @@
 //
 //  FrontCamUnMirror.xm
-//  FCUM
+//  FrontCamUnMirror
 //
-//  Created by Sticktron in 2014. All rights reserved.
+//  Un-mirror the camera preview when taking selfies.
+//
+//  Copyright (C) 2014-2015 Sticktron. All rights reserved.
 //
 //
 
-#import "FrontCamUnMirror.h"
+#define DEBUG_PREFIX @"••••• [FCUM]"
+#import "DebugLog.h"
 
 
-//--------------------------------------------------------------------------------------------------
-#define __DEBUG_ON__
-#ifdef __DEBUG_ON__
-	#define DebugLog(s, ...) \
-		NSLog(@" [FrontCamUnMirror] %@", [NSString stringWithFormat:(s), ##__VA_ARGS__])
-#else
-	#define DebugLog(s, ...)
-#endif
-//--------------------------------------------------------------------------------------------------
-
-
-
-#define kMirrorButtonImagePath			@"/Library/Application Support/FrontCamUnMirror/mirror.png"
-#define kMirrorButtonTitleMirrored		@"Mirrored"
-#define kMirrorButtonTitleUnMirrored	@"Un-Mirrored"
-#define kMirrorButtonFontName			@"DINAlternate-Bold"
-#define kMirrorButtonFontSize			11.0f
-#define kMirrorButtonTitleInsets		(UIEdgeInsets){ .left = 6.0f, .top = 2.0f, .right = 0, .bottom = 0 }
-#define kMirrorButtonMarginLeft			9.0f
-
-#define kTransformMirrorH				CGAffineTransformMake(-1, 0, 0, 1, 0, 0)
-
-// Apple's constants, my names
-#define kCameraModePhoto	0
-#define kCameraModeVideo	1
-#define kCameraModeSloMo	2
-#define kCameraModePano		3
-#define kCameraModeSquare	4
-
-
-// globals (file-scope)
-static UIButton *mirrorButton = nil;
-static PLCameraView *cameraView = nil;
-
-
-
-
-
-//--------------------------------------------------------------------------------------------------
-// New Class Members
-//--------------------------------------------------------------------------------------------------
-@interface PLCameraView (FCUM)
-- (void)handleMirrorButtonTap;
-- (void)mirrorPreview;
+@interface CAMTopBar : UIView
+- (id)delegate;
 @end
-//--------------------------------------------------------------------------------------------------
+
+@interface CAMCameraView : UIView // iOS 8 API
+@property (assign,nonatomic) int cameraDevice;
+- (void)setPreviewViewTransform:(CGAffineTransform)arg1;
+@end
+
+@interface PLCameraView : UIView // iOS 7 API
+@property(nonatomic) int cameraDevice;
+@property(readonly, nonatomic) CAMTopBar *_topBar;
+- (void)setPreviewViewTransform:(CGAffineTransform)arg1;
+@end
+
+@interface CAMTopBar (FCUM)
+- (void)unMirrorButtonPressed;
+- (void)updatePreviewTransformation;
+@end
+
+
+#ifndef kCFCoreFoundationVersionNumber_iOS_8_0
+#define kCFCoreFoundationVersionNumber_iOS_8_0 1140.10
+#endif
+
+#define IS_IOS7 (kCFCoreFoundationVersionNumber < kCFCoreFoundationVersionNumber_iOS_8_0)
+
+#define TRANSFORM_FLIP_H		CGAffineTransformMake(-1, 0, 0, 1, 0, 0)
+#define TRANSFORM_FLIP_V		CGAffineTransformMake(1, 0, 0, -1, 0, 0)
+
+#define CAMERA_YELLOW			[UIColor colorWithRed:1.0 green:0.8 blue:0 alpha:1]
+
+#define BUTTON_TITLE			@"Un-Mirror"
+#define BUTTON_TITLE_SELECTED	@"Un-Mirrored"
+
+#define CAMERA_MODE_PHOTO		0
+#define CAMERA_MODE_VIDEO		1
+#define CAMERA_MODE_SLOMO		2
+#define CAMERA_MODE_PANO		3
+#define CAMERA_MODE_SQUARE		4
+
+#define CAMERA_DEVICE_REAR		0
+#define CAMERA_DEVICE_FRONT		1
+
+#define PREFS_ID				CFSTR("com.sticktron.fcum")
+
+
+static UIButton *unMirrorButton = nil;
+static BOOL isEnabled = YES;
+
+
+static inline UIButton *createUnMirrorButton() {
+	UIButton *unMirrorButton = [UIButton buttonWithType:UIButtonTypeCustom];
+	unMirrorButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
+	unMirrorButton.userInteractionEnabled = YES;
+	unMirrorButton.selected = NO;
+	unMirrorButton.hidden = YES;
+	
+	float fontSize = IS_IOS7 ? 11.0f : 12.0f;
+	unMirrorButton.titleLabel.font = [UIFont fontWithName:@"DINAlternate-Bold" size:fontSize];
+	
+	// normal state
+	NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:BUTTON_TITLE];
+	[attributedString addAttribute:NSKernAttributeName value:@2 range:NSMakeRange(0, [BUTTON_TITLE length])];
+	[attributedString addAttribute:NSForegroundColorAttributeName value:UIColor.whiteColor range:NSMakeRange(0, [BUTTON_TITLE length])];
+	[unMirrorButton setAttributedTitle:attributedString forState:UIControlStateNormal];
+	//[unMirrorButton setImage:[UIImage imageWithContentsOfFile:kMirrorButtonImagePath] forState:UIControlStateNormal];
+	
+	// selected state
+	NSMutableAttributedString *attributedString2 = [[NSMutableAttributedString alloc] initWithString:BUTTON_TITLE_SELECTED];
+	[attributedString2 addAttribute:NSKernAttributeName value:@2 range:NSMakeRange(0, [BUTTON_TITLE_SELECTED length])];
+	[attributedString2 addAttribute:NSForegroundColorAttributeName value:CAMERA_YELLOW range:NSMakeRange(0, [BUTTON_TITLE_SELECTED length])];
+	[unMirrorButton setAttributedTitle:attributedString2 forState:UIControlStateSelected];
+	//[unMirrorButton setImage:[UIImage imageWithContentsOfFile:kMirrorButtonImagePath] forState:UIControlStateSelected];
+	
+	return unMirrorButton;
+}
+
+static inline BOOL isUsingFrontCamera(id cameraView) {
+	int device;
+	if (IS_IOS7) {
+		device = [((PLCameraView *)cameraView) cameraDevice];
+	} else {
+		device = [((CAMCameraView *)cameraView) cameraDevice];
+	}
+	return (device == CAMERA_DEVICE_FRONT);
+}
+
+static inline void loadSettings() {
+	NSDictionary *settings = nil;
+	
+	CFPreferencesAppSynchronize(PREFS_ID);
+	CFArrayRef keyList = CFPreferencesCopyKeyList(PREFS_ID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+	
+	if (keyList) {
+		settings = (NSDictionary *)CFBridgingRelease(CFPreferencesCopyMultiple(keyList, PREFS_ID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost));
+		CFRelease(keyList);
+		DebugLogC(@"loaded settings: %@", settings);
+	}
+	
+	isEnabled = settings[@"isEnabled"] ? [settings[@"isEnabled"] boolValue] : YES;
+}
+
+static inline void reloadSettings(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
+	loadSettings();
+}
 
 
 
-
-
-//--------------------------------------------------------------------------------------------------
 %hook CAMTopBar
-//--------------------------------------------------------------------------------------------------
 
 - (id)initWithFrame:(CGRect)frame {
 	self = %orig;
-	
-	// create mirror button if needed
-	
-	if (!mirrorButton) {
-		mirrorButton = [UIButton buttonWithType:UIButtonTypeCustom];
+	if (self) {
 		
-		mirrorButton.frame = CGRectMake(0, 0, 90.0f, 40.0f);
+		unMirrorButton = createUnMirrorButton();
 		
-		mirrorButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
-		mirrorButton.userInteractionEnabled = YES;
-		mirrorButton.hidden = YES;
-		mirrorButton.selected = NO;
+		[unMirrorButton addTarget:self
+						   action:@selector(handleUnMirrorButton)
+				 forControlEvents:UIControlEventTouchUpInside];
 		
-		mirrorButton.titleLabel.font = [UIFont fontWithName:kMirrorButtonFontName size:kMirrorButtonFontSize];
-		mirrorButton.titleEdgeInsets = kMirrorButtonTitleInsets;
-		
-		// config normal state
-		[mirrorButton setTitle:kMirrorButtonTitleMirrored forState:UIControlStateNormal];
-		[mirrorButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-		[mirrorButton setImage:[UIImage imageWithContentsOfFile:kMirrorButtonImagePath] forState:UIControlStateNormal];
-		
-		// config selected state
-		[mirrorButton setTitle:kMirrorButtonTitleUnMirrored forState:UIControlStateSelected];
-		[mirrorButton setTitleColor:[UIColor whiteColor] forState:UIControlStateSelected];
-		[mirrorButton setImage:[UIImage imageWithContentsOfFile:kMirrorButtonImagePath] forState:UIControlStateSelected];
+		[self addSubview:unMirrorButton];
 	}
-	
-	// setup tap action
-	[mirrorButton addTarget:cameraView
-					 action:@selector(handleMirrorButtonTap)
-		   forControlEvents:UIControlEventTouchUpInside];
-	
-	// add to view
-	[self addSubview:mirrorButton];
-	
 	return self;
 }
 
 - (void)layoutSubviews {
+	DebugLog0;
 	%orig;
 	
-	// layout mirror button
-	float top = (self.bounds.size.height - mirrorButton.frame.size.height) / 2.0f;
-	CGPoint origin = CGPointMake(kMirrorButtonMarginLeft, top);
-	mirrorButton.frame = (CGRect){origin, mirrorButton.frame.size};
-}
-
-%end
-//--------------------------------------------------------------------------------------------------
-
-
-
-
-
-//--------------------------------------------------------------------------------------------------
-%hook PLCameraView
-//--------------------------------------------------------------------------------------------------
-
-- (id)initWithFrame:(CGRect)arg1 spec:(id)arg2 {
-	DebugLog(@"initWithFrame:%@ spec:%@", NSStringFromCGRect(arg1), arg2);
+	unMirrorButton.frame = CGRectMake(10, 0, 90, self.bounds.size.height);
 	
-	// save this reference so we can use it in another class
-	cameraView = %orig;
-	
-	return cameraView;
-}
-
-- (BOOL)_shouldHideFlashButtonForMode:(long long)mode {
-	BOOL result = %orig;
-	
-	// The Flash Button doesn't show up when the front camera is active,
-	// since no devices have a flash on the front (yet?).
-	//
-	// Let's use this information to determine when the front camera is active.
-	// TODO: find a more concrete way to make this determination.
-	//
-	
-	DebugLog(@"PLCameraView::_shouldHideFlashButtonForMode(%lld) returning %@", mode, result?@"YES":@"NO");
-	
-	// Pano & SloMo modes don't use the front camera, so make sure we put things back to normal
-	if (mode == kCameraModePano || mode == kCameraModeSloMo) {
-		DebugLog(@"mode is Pano or SloMo (%lld)", mode);
-		
-		mirrorButton.hidden = YES;
-		if (mirrorButton.selected) {
-			mirrorButton.selected = NO;
-			[self mirrorPreview];
-		}
-		
+	if (isUsingFrontCamera(self.delegate) && isEnabled) {
+		unMirrorButton.hidden = NO;
 	} else {
-		DebugLog(@"mode is not Pano or SloMo (%lld)", mode);
-		// show mirror button when hiding flash button and vice-versa
-		mirrorButton.hidden = !result;
+		unMirrorButton.hidden = YES;
+		unMirrorButton.selected = NO;
 	}
 	
-	return result;
+	[self updatePreviewTransformation];
 }
 
 %new
-- (void)handleMirrorButtonTap {
-	DebugLog(@"Mirror Button was tapped");
-	
-	// change button state
-	mirrorButton.selected = !mirrorButton.selected;
-	
-	// flip the mirror state
-	[self mirrorPreview];
+- (void)handleUnMirrorButton {
+	unMirrorButton.selected = !unMirrorButton.selected;
+	[self updatePreviewTransformation];
 }
 
 %new
-- (void)mirrorPreview {
-	DebugLog(@"Flipping Preview.................");
+- (void)updatePreviewTransformation {
+	CGAffineTransform newTransform;
 	
-	// this is current preview transformation
-	CGAffineTransform currentTransform = MSHookIvar<CGAffineTransform>(self, "_previewTransform");
-	DebugLog(@"current transformation = %@", NSStringFromCGAffineTransform(currentTransform));
+	if (unMirrorButton.selected) {
+		UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+		if (orientation == UIDeviceOrientationLandscapeLeft || orientation == UIDeviceOrientationLandscapeRight) {
+			// landscape gets a vertical flip
+			newTransform = TRANSFORM_FLIP_V;
+		} else {
+			// portrait gets a horizontal flip
+			newTransform = TRANSFORM_FLIP_H;
+		}
+	} else {
+		// return to normal
+		newTransform = CGAffineTransformIdentity;
+	}
 	
-	// apply the mirror-h transform to the current transform
-	CGAffineTransform newTransform = CGAffineTransformConcat(currentTransform, kTransformMirrorH);
-	DebugLog(@"new transformation = %@", NSStringFromCGAffineTransform(newTransform));
-	
-	// apply the result to the view
-	[self setPreviewViewTransform:newTransform];
-	
-	DebugLog(@"Done.............................");
+	[self.delegate setPreviewViewTransform:newTransform];
 }
 
 %end
-//--------------------------------------------------------------------------------------------------
 
 
 
+%group iOS7
+
+%hook PLCameraView
+- (BOOL)_shouldHideFlashButtonForMode:(long long)mode {
+	// iOS 7 doesn't call layoutSubviews as often as iOS 8 when changing
+	// camera modes, but this method is called at the right times, so
+	// we'll use to it call layoutSubviews manually.
+	[self._topBar layoutSubviews];
+	return %orig;
+}
+%end
+
+%end
 
 
-//--------------------------------------------------------------------------------------------------
-// Constructor
-//--------------------------------------------------------------------------------------------------
+
 %ctor {
 	@autoreleasepool {
-		NSLog(@" FCUM, baby");
+		NSLog(@"FCUM baby!");
+		
+		loadSettings();
+		
 		%init;
+		if (IS_IOS7) {
+			%init(iOS7);
+		}
+		
+		CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(),
+										NULL,
+										(CFNotificationCallback)reloadSettings,
+										CFSTR("com.sticktron.fcum.settingschanged"),
+										NULL,
+										CFNotificationSuspensionBehaviorDeliverImmediately);
 	}
 }
-//--------------------------------------------------------------------------------------------------
 

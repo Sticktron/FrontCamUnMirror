@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>title</key>
+	<string>FrontCamUnMirror</string>
+	
+	<key>items</key>
+	<array>
+		
+		<!-- [] Title -->
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>headerCellClass</key>
+			<string>FCUMTitleCell</string>
+		</dict>
+
+		<!-- Enabled Switch -->
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>cellClass</key>
+			<string>FCUMSwitchCell</string>
+			<key>label</key>
+			<string>Enabled</string>
+			<key>key</key>
+			<string>isEnabled</string>
+			<key>defaults</key>
+			<string>com.sticktron.fcum</string>
+			<key>default</key>
+			<true/>
+			<key>PostNotification</key>
+			<string>com.sticktron.fcum.settingschanged</string>
+		</dict>
+		
+		
+		<!-- [] Contact -->
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Contact Me</string>
+		</dict>
+		
+		<!-- Email Button -->
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>cellClass</key>
+			<string>FCUMButtonCell</string>
+			<key>label</key>
+			<string>sticktron@hotmail.com</string>
+			<key>icon</key>
+			<string>Email.png</string>
+			<key>action</key>
+			<string>openEmail</string>
+		</dict>
+		
+		<!-- Twitter Button -->
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>cellClass</key>
+			<string>FCUMButtonCell</string>
+			<key>label</key>
+			<string>@Sticktron</string>
+			<key>icon</key>
+			<string>Twitter.png</string>
+			<key>action</key>
+			<string>openTwitter</string>
+		</dict>
+		
+		
+		<!-- [] Source Code -->
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Source Code</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>cellClass</key>
+			<string>FCUMButtonCell</string>
+			<key>label</key>
+			<string>Available on GitHub.com</string>
+			<key>icon</key>
+			<string>GitHub.png</string>
+			<key>action</key>
+			<string>openGitHub</string>
+		</dict>
+		
+		
+		<!-- [] Credits -->
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerAlignment</key>
+			<integer>1</integer>
+			<key>footerText</key>
+			<string>Copyright © 2014-2015 Sticktron.
+
+😈
+
+</string>
+		</dict>
+		
+		
+	</array>
+</dict>
+</plist>

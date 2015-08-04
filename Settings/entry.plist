@@ -1,0 +1,10 @@
+{
+	entry = {
+		bundle = FrontCamUnMirror;
+		cell = PSLinkCell;
+		detail = "FCUMSettingsController";
+		icon = "Icon.png";
+		isController = 1;
+		label = FrontCamUnMirror;
+	};
+}

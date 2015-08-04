@@ -1,18 +1,25 @@
 ARCHS = armv7 arm64
-
 TARGET = iphone:clang:latest:7.0
 
 THEOS_BUILD_DIR = Packages
 
-include theos/makefiles/common.mk
-
 TWEAK_NAME = FrontCamUnMirror
 FrontCamUnMirror_CFLAGS = -fobjc-arc
 FrontCamUnMirror_FILES = FrontCamUnMirror.xm
-FrontCamUnMirror_FRAMEWORKS = Foundation UIKit CoreGraphics
-FrontCamUnMirror_PRIVATEFRAMEWORKS = PhotoLibrary
+FrontCamUnMirror_FRAMEWORKS = UIKit CoreGraphics
+FrontCamUnMirror_PRIVATEFRAMEWORKS = CameraKit PhotoLibrary
 
+SUBPROJECTS += Settings
+
+include theos/makefiles/common.mk
 include $(THEOS_MAKE_PATH)/tweak.mk
+include $(THEOS_MAKE_PATH)/aggregate.mk
+
+# optimize (crush pngs, convert plists to binary)
+after-stage::
+	find $(FW_STAGING_DIR) -iname '*.plist' -or -iname '*.strings' -exec plutil -convert binary1 {} \;
+	find $(FW_STAGING_DIR) -iname '*.png' -exec pincrush-osx -i {} \;
+#
 
 after-install::
 	install.exec "killall -9 backboardd"

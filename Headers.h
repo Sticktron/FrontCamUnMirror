@@ -1,8 +1,8 @@
 //
-//  FrontCamUnMirror.h
+//  Headers.h
 //  FCUM
 //
-//  Created by Sticktron in 2014. All rights reserved.
+//	iOS 7.x Private APIs
 //
 //
 
@@ -10,25 +10,12 @@
 #import <UIKit/UIKit.h>
 
 
-@class AVCaptureSession, AVCaptureConnection;
+//------------------------------------------------------------------------------
+// PhotoLibrary (iOS7) API
+//------------------------------------------------------------------------------
 
-//--------------------------------------------------------------------------------------------------
+@class CAMFlashButton;
 
-@interface CAMButtonLabel : UIView {
-    UILabel *__label;
-}
-@property(readonly, nonatomic) UILabel *_label; // @synthesize _label=__label;
-@end
-
-//--------------------------------------------------------------------------------------------------
-
-@interface CAMFlashButton : UIControl {
-    CAMButtonLabel *__autoLabel;
-}
-@property(readonly, nonatomic) CAMButtonLabel *_autoLabel; // @synthesize _autoLabel=__autoLabel;
-@end
-
-//--------------------------------------------------------------------------------------------------
 
 @interface CAMTopBar : UIView
 @property(retain, nonatomic) CAMFlashButton *flashButton; // @synthesize flashButton=_flashButton;
@@ -53,7 +40,6 @@
 - (void)_commonCAMTopBarInitialization;
 @end
 
-//--------------------------------------------------------------------------------------------------
 
 @interface PLCameraView : UIView
 {
@@ -78,14 +64,10 @@
 - (void)_updateEnabledControlsWithReason:(id)arg1;
 @end
 
-//--------------------------------------------------------------------------------------------------
-
 
 @interface PLCameraViewController : UIViewController
 @end
 
-
-//--------------------------------------------------------------------------------------------------
 
 @interface PLApplicationCameraViewController : PLCameraViewController
 - (id)initWithSessionID:(id)arg1 startPreviewImmediately:(_Bool)arg2;
@@ -97,15 +79,6 @@
 - (void)_defaultCameraDevice:(id *)arg1 cameraMode:(id *)arg2;
 @end
 
-//--------------------------------------------------------------------------------------------------
-
-@interface DeferredPUApplicationCameraViewController : PLApplicationCameraViewController
-- (id)initForCurrentPlatformWithSessionID:(id)arg1 usesCameraLocationBundleID:(_Bool)arg2 startPreviewImmediately:(_Bool)arg3;
-- (id)initForCurrentPlatformWithSessionID:(id)arg1 startPreviewImmediately:(_Bool)arg2;
-- (id)_initWithSessionID:(id)arg1 usesCameraLocationBundleID:(_Bool)arg2 startPreviewImmediately:(_Bool)arg3;
-@end
-
-//--------------------------------------------------------------------------------------------------
 
 @interface PLCameraController : NSObject
 - (void)startPreview;
@@ -116,27 +89,7 @@
 - (void)observeValueForKeyPath:(id)arg1 ofObject:(id)arg2 change:(id)arg3 context:(void *)arg4;
 @end
 
-//--------------------------------------------------------------------------------------------------
 
-@protocol UIImagePickerCameraViewController <NSObject>
-- (void)_stopVideoCapture;
-- (_Bool)_startVideoCapture;
-- (void)_setCameraFlashMode:(long long)arg1;
-- (long long)_cameraFlashMode;
-- (void)_setCameraCaptureMode:(long long)arg1;
-- (long long)_cameraCaptureMode;
-- (void)_setCameraDevice:(long long)arg1;
-- (long long)_cameraDevice;
-- (void)_takePicture;
-- (void)_setCameraViewTransform:(struct CGAffineTransform)arg1;
-- (struct CGAffineTransform)_cameraViewTransform;
-- (void)_setCameraOverlayView:(id)arg1;
-- (id)_cameraOverlayView;
-- (void)_setShowsCameraControls:(_Bool)arg1;
-- (_Bool)_showsCameraControls;
-@end
-
-//--------------------------------------------------------------------------------------------------
 @interface PLUICameraViewController : PLCameraViewController
 {
     long long _previousStatusBarStyle;
@@ -154,16 +107,4 @@
 - (id)_cameraView;
 @end
 
-//--------------------------------------------------------------------------------------------------
-
-@interface UIImagePickerController (FCUM_Privates)
-- (id)_cameraViewController;
-- (id)_createInitialController;
-- (void)_setupControllersForCurrentMediaTypes;
-- (void)_setupControllersForCurrentSourceType;
-- (BOOL)_sourceTypeIsCamera;
-- (void)_updateCameraCaptureMode;
-@end
-
-//--------------------------------------------------------------------------------------------------
 
