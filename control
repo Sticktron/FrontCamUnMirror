@@ -1,0 +1,9 @@
+Package: com.sticktron.fcum
+Name: FrontCamUnMirror
+Version: 1.0
+Architecture: iphoneos-arm
+Depends: firmware (>= 7.0), mobilesubstrate
+Description: Un-mirror the camera preview when taking selfies.
+Icon: file:///Library/PreferenceBundles/FrontCamUnMirror.bundle/Icon-Cydia.png
+Author: Sticktron <sticktron@hotmail.com>
+Section: Tweaks
