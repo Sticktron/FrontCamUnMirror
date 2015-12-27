@@ -1,7 +1,8 @@
 {
 	Filter = {
 		Bundles = (
-			"com.apple.PhotoLibrary", "com.apple.CameraKit"
+			"com.apple.camera",
+			"com.apple.MobileSMS",
 		);
 	};
 }
