@@ -4,8 +4,7 @@
 //
 //  Un-mirror the camera preview when taking selfies.
 //
-//  Copyright (C) 2014-2015 Sticktron. All rights reserved.
-//
+//  Copyright © 2014-2015 Sticktron. All rights reserved.
 //
 
 #define DEBUG_PREFIX @"••••• [FCUM]"

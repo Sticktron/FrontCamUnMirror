@@ -14,6 +14,8 @@
 			<string>PSGroupCell</string>
 			<key>headerCellClass</key>
 			<string>FCUMTitleCell</string>
+			<key>footerText</key>
+			<string>Respring to apply changes</string>
 		</dict>
 
 		<!-- Enabled Switch -->
@@ -32,6 +34,20 @@
 			<true/>
 			<key>PostNotification</key>
 			<string>com.sticktron.fcum.settingschanged</string>
+		</dict>
+		
+		<!-- Respring Button -->
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>cellClass</key>
+			<string>FCUMButtonCell</string>
+			<key>label</key>
+			<string>Restart SpringBoard</string>
+			<key>icon</key>
+			<string>Respring.png</string>
+			<key>action</key>
+			<string>respring</string>
 		</dict>
 		
 		

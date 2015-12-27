@@ -13,6 +13,8 @@
 #import <Preferences/PSTableCell.h>
 #import <Preferences/PSSwitchTableCell.h>
 #import <Social/Social.h>
+#import <spawn.h>
+
 
 #define TINT_COLOR			[UIColor colorWithRed:0.5 green:0 blue:1 alpha:1]
 #define BUNDLE_PATH			@"/Library/PreferenceBundles/FrontCamUnMirror.bundle/"
@@ -93,6 +95,33 @@
 	[self presentViewController:composeController
 					   animated:YES
 					 completion:nil];
+}
+
+- (void)respring {
+	NSLog(@"FCUM called for a respring!");
+	
+	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Respring"
+													message:@"Restart SpringBoard now?"
+												   delegate:self
+										  cancelButtonTitle:@"NO"
+										  otherButtonTitles:@"YES", nil];
+	[alert show];
+}
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(int)buttonIndex {
+	if (buttonIndex == 1) { // YES
+		[self respringNow];
+	}
+}
+
+- (void)respringNow {
+	pid_t pid;
+	const char* args[] = { "killall", "-9", "backboardd", NULL };
+	posix_spawn(&pid, "/usr/bin/killall", NULL, NULL, (char* const*)args, NULL);
+	
+	// wait until killed
+	//int status;
+	//waitpid(pid, &status, WEXITED);
 }
 
 @end
