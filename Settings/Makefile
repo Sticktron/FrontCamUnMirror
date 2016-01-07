@@ -4,11 +4,11 @@ TARGET = iphone:clang:latest:7.0
 include theos/makefiles/common.mk
 
 BUNDLE_NAME = FrontCamUnMirror
-FrontCamUnMirror_FILES = FCUMSettings.mm
 FrontCamUnMirror_CFLAGS = -fobjc-arc
-FrontCamUnMirror_INSTALL_PATH = /Library/PreferenceBundles
+FrontCamUnMirror_FILES = FCUMSettings.mm
 FrontCamUnMirror_FRAMEWORKS = UIKit Social
 FrontCamUnMirror_PRIVATE_FRAMEWORKS = Preferences
+FrontCamUnMirror_INSTALL_PATH = /Library/PreferenceBundles
 
 include $(THEOS_MAKE_PATH)/bundle.mk
 

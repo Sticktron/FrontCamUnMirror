@@ -7,7 +7,6 @@ TWEAK_NAME = FrontCamUnMirror
 FrontCamUnMirror_CFLAGS = -fobjc-arc
 FrontCamUnMirror_FILES = FrontCamUnMirror.xm
 FrontCamUnMirror_FRAMEWORKS = UIKit CoreGraphics
-FrontCamUnMirror_PRIVATEFRAMEWORKS = CameraUI CameraKit PhotoLibrary
 
 SUBPROJECTS += Settings
 

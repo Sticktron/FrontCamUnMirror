@@ -10,10 +10,9 @@ This tweak adds an un-mirror button to the toolbar when using the front-facing c
 
 ### Device Compatibility
 
-* iOS 7.x - 8.x
-* Any device with a front camera
-
+* iPhone/iPod: iOS 7 - 9.
+* iPad: iOS 9.
 
 Thanks to the /r/jailbreak community for the idea and testing.
 
-Copyright (C) 2014-2015 Sticktron. All rights reserved.
+Copyright (C) 2014-2016 Sticktron. All rights reserved.

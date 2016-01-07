@@ -4,10 +4,10 @@
 <dict>
 	<key>title</key>
 	<string>FrontCamUnMirror</string>
-	
+
 	<key>items</key>
 	<array>
-		
+
 		<!-- [] Title -->
 		<dict>
 			<key>cell</key>
@@ -15,7 +15,7 @@
 			<key>headerCellClass</key>
 			<string>FCUMTitleCell</string>
 			<key>footerText</key>
-			<string>Respring to apply changes</string>
+			<string>⚠️ Respring to apply changes</string>
 		</dict>
 
 		<!-- Enabled Switch -->
@@ -32,10 +32,8 @@
 			<string>com.sticktron.fcum</string>
 			<key>default</key>
 			<true/>
-			<key>PostNotification</key>
-			<string>com.sticktron.fcum.settingschanged</string>
 		</dict>
-		
+
 		<!-- Respring Button -->
 		<dict>
 			<key>cell</key>
@@ -44,21 +42,19 @@
 			<string>FCUMButtonCell</string>
 			<key>label</key>
 			<string>Restart SpringBoard</string>
-			<key>icon</key>
-			<string>Respring.png</string>
 			<key>action</key>
 			<string>respring</string>
 		</dict>
-		
-		
+
+
 		<!-- [] Contact -->
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>label</key>
-			<string>Contact Me</string>
+			<string>Support</string>
 		</dict>
-		
+
 		<!-- Email Button -->
 		<dict>
 			<key>cell</key>
@@ -68,11 +64,11 @@
 			<key>label</key>
 			<string>sticktron@hotmail.com</string>
 			<key>icon</key>
-			<string>Email.png</string>
+			<string>email.png</string>
 			<key>action</key>
 			<string>openEmail</string>
 		</dict>
-		
+
 		<!-- Twitter Button -->
 		<dict>
 			<key>cell</key>
@@ -82,12 +78,12 @@
 			<key>label</key>
 			<string>@Sticktron</string>
 			<key>icon</key>
-			<string>Twitter.png</string>
+			<string>twitter.png</string>
 			<key>action</key>
 			<string>openTwitter</string>
 		</dict>
-		
-		
+
+
 		<!-- [] Source Code -->
 		<dict>
 			<key>cell</key>
@@ -103,12 +99,12 @@
 			<key>label</key>
 			<string>Available on GitHub.com</string>
 			<key>icon</key>
-			<string>GitHub.png</string>
+			<string>github.png</string>
 			<key>action</key>
 			<string>openGitHub</string>
 		</dict>
-		
-		
+
+
 		<!-- [] Credits -->
 		<dict>
 			<key>cell</key>
@@ -116,14 +112,14 @@
 			<key>footerAlignment</key>
 			<integer>1</integer>
 			<key>footerText</key>
-			<string>Copyright © 2014-2015 Sticktron.
+			<string>Copyright © 2014-2016 Sticktron.
 
 😈
 
 </string>
 		</dict>
-		
-		
+
+
 	</array>
 </dict>
 </plist>

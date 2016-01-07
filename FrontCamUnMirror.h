@@ -1,7 +1,22 @@
 //
-//  Headers.h
+//  FrontCamUnMirror.h
 //  FrontCamUnMirror
 //
+
+#ifndef kCFCoreFoundationVersionNumber_iOS_8_0
+#define kCFCoreFoundationVersionNumber_iOS_8_0 1140.10
+#endif
+
+#ifndef kCFCoreFoundationVersionNumber_iOS_9_0
+#define kCFCoreFoundationVersionNumber_iOS_9_0 1240.10
+#endif
+
+#define IS_IOS7 (kCFCoreFoundationVersionNumber < kCFCoreFoundationVersionNumber_iOS_8_0)
+#define IS_IOS8 ((kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_8_0) && (kCFCoreFoundationVersionNumber < kCFCoreFoundationVersionNumber_iOS_9_0))
+#define IS_AT_LEAST_IOS9 (kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_9_0)
+
+#define IS_IPAD (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+
 
 /* iOS 7/8 */
 
@@ -17,7 +32,7 @@
 @property (nonatomic, assign) int cameraMode;
 @property (nonatomic, readonly) CAMTopBar *_topBar;
 - (void)setPreviewViewTransform:(CGAffineTransform)arg1;
-- (BOOL)_shouldHideFlashButtonForMode:(long long)mode;
+- (BOOL)_shouldHideFlashButtonForMode:(int)mode;
 @end
 
 
@@ -58,8 +73,5 @@
 @property (nonatomic, assign) int _currentMode;                                                                                                                                     //@synthesize _currentMode=__currentMode - In the implementation block
 @property (nonatomic, assign) int _currentDevice;                                                                                                                                 //@synthesize _currentDevice=__currentDevice - In the implementation block
 - (CAMPreviewViewController *)_previewViewController;
-- (void)changeToMode:(int)arg1 device:(int)arg2;
-- (void)_changeToMode:(int)arg1 device:(int)arg2;
-- (void)changeToMode:(int)arg1 device:(int)arg2 animated:(char)arg3;
 - (void)_didChangeToMode:(int)arg1 device:(int)arg2 shouldProcessIdenticalChanges:(char)arg3;
 @end

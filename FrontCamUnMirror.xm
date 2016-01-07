@@ -3,6 +3,8 @@
 //  FrontCamUnMirror
 //
 //  Un-mirror the camera preview when taking selfies.
+//  Adds a new button to the camera UI.
+//
 //  Supports iOS 7-9.
 //
 //  Copyright © 2014-2016 Sticktron. All rights reserved.
@@ -10,37 +12,8 @@
 
 #define DEBUG_PREFIX @"••••• [FCUM]"
 #import "DebugLog.h"
-#import "Headers.h"
+#import "FrontCamUnMirror.h"
 
-
-@interface CAMTopBar (FCUM)
-- (void)unMirrorButtonPressed;
-- (void)updatePreviewTransformation;
-@end
-
-@interface CAMBottomBar (FCUM)
-- (UIButton *)_fcum_createUnMirrorButton;
-- (void)_fcum_handleUnMirrorButton;
-@end
-
-@interface CAMViewfinderViewController (FCUM)
-- (void)_fcum_updatePreviewTransformation;
-@end
-
-
-#ifndef kCFCoreFoundationVersionNumber_iOS_8_0
-#define kCFCoreFoundationVersionNumber_iOS_8_0 1140.10
-#endif
-
-#ifndef kCFCoreFoundationVersionNumber_iOS_9_0
-#define kCFCoreFoundationVersionNumber_iOS_9_0 1240.10
-#endif
-
-#define IS_IOS7 (kCFCoreFoundationVersionNumber < kCFCoreFoundationVersionNumber_iOS_8_0)
-#define IS_IOS8 ((kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_8_0) && (kCFCoreFoundationVersionNumber < kCFCoreFoundationVersionNumber_iOS_9_0))
-#define IS_IOS9 (kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_9_0)
-
-#define IS_IPAD (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 
 #define CAMERA_DEVICE_REAR		0
 #define CAMERA_DEVICE_FRONT		1
@@ -57,88 +30,82 @@
 
 #define CAMERA_YELLOW			[UIColor colorWithRed:1.0 green:0.8 blue:0 alpha:1]
 
-// iOS 7/8
-#define BUTTON_TITLE			@"Un-Mirror"
-#define BUTTON_TITLE_SELECTED	@"Un-Mirrored"
-
-#define PREFS_ID				CFSTR("com.sticktron.fcum")
+#define PREFS_PLIST_PATH		[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Preferences/com.sticktron.fcum.plist"]
 
 
-static UIButton *unMirrorButton = nil;
+@interface CAMTopBar (FCUM)
+- (BOOL)fcum_isUsingFrontCamera;
+- (void)fcum_unMirrorButtonPressed;
+- (void)fcum_updatePreviewTransformation;
+@end
+
+@interface CAMBottomBar (FCUM)
+- (void)fcum_unMirrorButtonPressed;
+@end
+
+@interface CAMViewfinderViewController (FCUM)
+- (void)fcum_updatePreviewTransformation;
+@end
+
+
 static BOOL isEnabled = YES;
+static UIButton *unMirrorButton = nil;
 
 
 static void loadSettings() {
-	NSDictionary *settings = nil;
+	DebugLogC(@"loading settings");
 
-	CFPreferencesAppSynchronize(PREFS_ID);
-	CFArrayRef keyList = CFPreferencesCopyKeyList(PREFS_ID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+	NSDictionary *settings = [NSDictionary dictionaryWithContentsOfFile:PREFS_PLIST_PATH];
 
-	if (keyList) {
-		settings = (NSDictionary *)CFBridgingRelease(CFPreferencesCopyMultiple(keyList, PREFS_ID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost));
-		CFRelease(keyList);
-		DebugLogC(@"loaded settings: %@", settings);
-	}
-
-	isEnabled = settings[@"isEnabled"] ? [settings[@"isEnabled"] boolValue] : YES;
-}
-
-// iOS 7/8
-static UIButton *createUnMirrorButton() {
-	UIButton *unMirrorButton = [UIButton buttonWithType:UIButtonTypeCustom];
-	unMirrorButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
-	unMirrorButton.userInteractionEnabled = YES;
-	unMirrorButton.selected = NO;
-	unMirrorButton.hidden = YES;
-
-	float fontSize = IS_IOS7 ? 11.0f : 12.0f;
-	unMirrorButton.titleLabel.font = [UIFont fontWithName:@"DINAlternate-Bold" size:fontSize];
-
-	// normal state
-	NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:BUTTON_TITLE];
-	[attributedString addAttribute:NSKernAttributeName value:@2 range:NSMakeRange(0, [BUTTON_TITLE length])];
-	[attributedString addAttribute:NSForegroundColorAttributeName value:UIColor.whiteColor range:NSMakeRange(0, [BUTTON_TITLE length])];
-	[unMirrorButton setAttributedTitle:attributedString forState:UIControlStateNormal];
-	//[unMirrorButton setImage:[UIImage imageWithContentsOfFile:kMirrorButtonImagePath] forState:UIControlStateNormal];
-
-	// selected state
-	NSMutableAttributedString *attributedString2 = [[NSMutableAttributedString alloc] initWithString:BUTTON_TITLE_SELECTED];
-	[attributedString2 addAttribute:NSKernAttributeName value:@2 range:NSMakeRange(0, [BUTTON_TITLE_SELECTED length])];
-	[attributedString2 addAttribute:NSForegroundColorAttributeName value:CAMERA_YELLOW range:NSMakeRange(0, [BUTTON_TITLE_SELECTED length])];
-	[unMirrorButton setAttributedTitle:attributedString2 forState:UIControlStateSelected];
-	//[unMirrorButton setImage:[UIImage imageWithContentsOfFile:kMirrorButtonImagePath] forState:UIControlStateSelected];
-
-	return unMirrorButton;
-}
-
-// iOS 7/8
-static BOOL isUsingFrontCamera(id cameraView) {
-	int device;
-	if (IS_IOS7) {
-		device = [((PLCameraView *)cameraView) cameraDevice];
+	if (settings && settings[@"isEnabled"]) {
+		DebugLogC(@"found settings: %@", settings);
+		isEnabled = [settings[@"isEnabled"] boolValue];
 	} else {
-		device = [((CAMCameraView *)cameraView) cameraDevice];
+		DebugLogC(@"no settings.");
 	}
-	return (device == CAMERA_DEVICE_FRONT);
 }
 
 
 //------------------------------------------------------------------------------
-// Hooks for iOS 7/8
-//------------------------------------------------------------------------------
+
 
 %group iOS_7_8
 
 %hook CAMTopBar
 
 - (id)initWithFrame:(CGRect)frame {
-	self = %orig;
-	if (self) {
+	DebugLog0;
 
-		unMirrorButton = createUnMirrorButton();
+	if ((self = %orig)) {
+
+		// create FCUM button ...
+
+		unMirrorButton = [UIButton buttonWithType:UIButtonTypeCustom];
+		unMirrorButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
+		unMirrorButton.userInteractionEnabled = YES;
+		unMirrorButton.selected = NO;
+		unMirrorButton.hidden = YES;
+
+		float fontSize = IS_IOS8 ? 12.0f : 11.0f;
+
+		// normal state
+		NSAttributedString *title = [[NSAttributedString alloc] initWithString:@"Un-Mirror" attributes:@{
+			NSFontAttributeName: [UIFont fontWithName:@"DINAlternate-Bold" size:fontSize],
+			NSKernAttributeName: @2.0,
+			NSForegroundColorAttributeName: UIColor.whiteColor,
+		}];
+		[unMirrorButton setAttributedTitle:title forState:UIControlStateNormal];
+
+		// selected state
+		NSAttributedString *selectedTitle = [[NSAttributedString alloc] initWithString:@"Un-Mirrored" attributes:@{
+			NSFontAttributeName: [UIFont fontWithName:@"DINAlternate-Bold" size:fontSize],
+			NSKernAttributeName: @2.0,
+			NSForegroundColorAttributeName: CAMERA_YELLOW,
+		}];
+		[unMirrorButton setAttributedTitle:selectedTitle forState:UIControlStateSelected];
 
 		[unMirrorButton addTarget:self
-						   action:@selector(handleUnMirrorButton)
+						   action:@selector(fcum_unMirrorButtonPressed)
 				 forControlEvents:UIControlEventTouchUpInside];
 
 		[self addSubview:unMirrorButton];
@@ -152,24 +119,46 @@ static BOOL isUsingFrontCamera(id cameraView) {
 
 	unMirrorButton.frame = CGRectMake(10, 0, 90, self.bounds.size.height);
 
-	if (isUsingFrontCamera(self.delegate)) {
+	if ([self fcum_isUsingFrontCamera]) {
 		unMirrorButton.hidden = NO;
 	} else {
 		unMirrorButton.hidden = YES;
 		unMirrorButton.selected = NO;
 	}
 
-	[self updatePreviewTransformation];
+	[self fcum_updatePreviewTransformation];
 }
 
 %new
-- (void)handleUnMirrorButton {
+- (BOOL)fcum_isUsingFrontCamera {
+	BOOL result;
+	int device = 10000; //unknown
+
+	if (self.delegate) {
+		if (IS_IOS8) {
+			device = [((CAMCameraView *)(self.delegate)) cameraDevice];
+		} else {
+			device = [((PLCameraView *)(self.delegate)) cameraDevice];
+		}
+	}
+	result = (device == CAMERA_DEVICE_FRONT);
+	DebugLog(@"= %@", result ? @"YES" : @"NO");
+
+	return result;
+}
+
+%new
+- (void)fcum_unMirrorButtonPressed {
+	DebugLog0;
+
 	unMirrorButton.selected = !unMirrorButton.selected;
-	[self updatePreviewTransformation];
+	[self fcum_updatePreviewTransformation];
 }
 
 %new
-- (void)updatePreviewTransformation {
+- (void)fcum_updatePreviewTransformation {
+	DebugLog0;
+
 	CGAffineTransform newTransform;
 
 	if (unMirrorButton.selected) {
@@ -186,57 +175,82 @@ static BOOL isUsingFrontCamera(id cameraView) {
 		newTransform = CGAffineTransformIdentity;
 	}
 
-	[self.delegate setPreviewViewTransform:newTransform];
+	if (self.delegate) {
+		[self.delegate setPreviewViewTransform:newTransform];
+	}
 }
 
 %end
 
-%end //grp
+%end
 
 
 //------------------------------------------------------------------------------
-// Hooks for iOS 7
-//------------------------------------------------------------------------------
+
 
 %group iOS_7
 
 %hook PLCameraView
+
 - (BOOL)_shouldHideFlashButtonForMode:(long long)mode {
+	DebugLog0;
+
 	// iOS 7 doesn't call layoutSubviews as often as iOS 8 when changing
-	// camera modes, but this method is called at the right times, so
-	// we'll use to it call layoutSubviews manually.
+	// camera modes, so let's call it layoutSubviews manually here.
 	[self._topBar layoutSubviews];
+
 	return %orig;
 }
+
 %end
 
-%end //grp
+%end
 
 
 //------------------------------------------------------------------------------
-// Hooks for iOS 9
-//------------------------------------------------------------------------------
+
 
 %group iOS_9
 
 %hook CAMBottomBar
 
-- (id)initWithFrame:(CGRect)frame {
-	self = %orig;
-	if (self) {
+- (void)_commonCAMBottomBarInitialization {
+	DebugLog0;
+	%orig;
 
-		if (!unMirrorButton) {
-			unMirrorButton = [self _fcum_createUnMirrorButton];
-		}
-		DebugLog(@"unMirrorButton=%@", unMirrorButton);
+	// create FCUM button ...
 
-		[unMirrorButton addTarget:self
-						   action:@selector(_fcum_handleUnMirrorButton)
-				 forControlEvents:UIControlEventTouchUpInside];
+	unMirrorButton = [UIButton buttonWithType:UIButtonTypeCustom];
+	unMirrorButton.frame = CGRectMake(0, 0, 30, 30);
+	unMirrorButton.userInteractionEnabled = YES;
+	unMirrorButton.selected = NO;
+	unMirrorButton.hidden = YES;
 
-		[self addSubview:unMirrorButton];
-	}
-	return self;
+	unMirrorButton.titleLabel.textAlignment = NSTextAlignmentCenter;
+	unMirrorButton.titleLabel.lineBreakMode = NSLineBreakByWordWrapping;
+	unMirrorButton.titleLabel.numberOfLines = 2;
+
+	// normal state
+	NSAttributedString *title = [[NSAttributedString alloc] initWithString:@"UN MIR" attributes:@{
+		NSFontAttributeName: [UIFont systemFontOfSize:10],
+		NSKernAttributeName: @1.0,
+		NSForegroundColorAttributeName: UIColor.whiteColor,
+	}];
+	[unMirrorButton setAttributedTitle:title forState:UIControlStateNormal];
+
+	// selected state
+	NSAttributedString *selectedTitle = [[NSAttributedString alloc] initWithString:@"UN MIR" attributes:@{
+		NSFontAttributeName: [UIFont systemFontOfSize:10],
+		NSKernAttributeName: @1.0,
+		NSForegroundColorAttributeName: CAMERA_YELLOW,
+	}];
+	[unMirrorButton setAttributedTitle:selectedTitle forState:UIControlStateSelected];
+
+	[unMirrorButton addTarget:self
+					   action:@selector(fcum_unMirrorButtonPressed)
+			 forControlEvents:UIControlEventTouchUpInside];
+
+	[self addSubview:unMirrorButton];
 }
 
 - (void)layoutSubviews {
@@ -244,62 +258,38 @@ static BOOL isUsingFrontCamera(id cameraView) {
 	%orig;
 
 	// update position
-	if (self.shutterButton) {
+	if (self.shutterButton && self.imageWell) {
 		unMirrorButton.center = self.shutterButton.center;
+		//unMirrorButton.center = self.imageWell.center;
 
+		CGRect shutterFrame = self.shutterButton.frame;
 		CGRect frame = unMirrorButton.frame;
-		frame.origin.x += 60;
+
+		if (IS_IPAD) {
+			// put button on top of shutter
+			frame.origin.y = shutterFrame.origin.y - shutterFrame.size.height - 20;
+		} else {
+			// put button beside shutter
+			frame.origin.x = shutterFrame.origin.x + shutterFrame.size.width + 20;
+		}
+
 		unMirrorButton.frame = frame;
 	}
 
 	// update orientation
-	if (self.imageWell) {
+	if (self.imageWell && self.imageWell._thumbnailImageView) {
 		unMirrorButton.transform = self.imageWell._thumbnailImageView.transform;
 	}
 }
 
 %new
-- (UIButton *)_fcum_createUnMirrorButton {
+- (void)fcum_unMirrorButtonPressed {
 	DebugLog0;
 
-	UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-
-	button.frame = CGRectMake(0, 0, 30, 30);
-	//button.backgroundColor = [UIColor colorWithWhite:1 alpha:0.1];
-	button.userInteractionEnabled = YES;
-	button.selected = NO;
-
-	button.titleLabel.textAlignment = NSTextAlignmentCenter;
-	button.titleLabel.lineBreakMode = NSLineBreakByWordWrapping;
-	button.titleLabel.numberOfLines = 2;
-
-	button.titleLabel.font = [UIFont systemFontOfSize:10];
-	//button.titleLabel.font = [UIFont fontWithName:@"DINAlternate-Bold" size:10];
-
-	NSString *title = @"UN MIR";
-
-	// normal state
-	NSMutableAttributedString *normalTitle = [[NSMutableAttributedString alloc] initWithString:title];
-	[normalTitle addAttribute:NSKernAttributeName value:@1 range:NSMakeRange(0, title.length)];
-	[normalTitle addAttribute:NSForegroundColorAttributeName value:UIColor.whiteColor range:NSMakeRange(0, title.length)];
-	[button setAttributedTitle:normalTitle forState:UIControlStateNormal];
-	//[unMirrorButton setImage:[UIImage imageWithContentsOfFile:kMirrorButtonImagePath] forState:UIControlStateNormal];
-
-	// selected state
-	NSMutableAttributedString *selectedTitle = [[NSMutableAttributedString alloc] initWithString:title];
-	[selectedTitle addAttribute:NSKernAttributeName value:@1 range:NSMakeRange(0, title.length)];
-	[selectedTitle addAttribute:NSForegroundColorAttributeName value:CAMERA_YELLOW range:NSMakeRange(0, title.length)];
-	[button setAttributedTitle:selectedTitle forState:UIControlStateSelected];
-
-	return button;
-}
-
-%new
-- (void)_fcum_handleUnMirrorButton {
 	unMirrorButton.selected = !unMirrorButton.selected;
 
 	if (self.visibilityDelegate) {
-		[self.visibilityDelegate _fcum_updatePreviewTransformation];
+		[self.visibilityDelegate fcum_updatePreviewTransformation];
 	}
 }
 
@@ -307,26 +297,28 @@ static BOOL isUsingFrontCamera(id cameraView) {
 
 
 %hook CAMViewfinderViewController
+
 - (void)_didChangeToMode:(int)mode device:(int)device shouldProcessIdenticalChanges:(char)arg3 {
-	DebugLog0;
 	%orig;
 
 	DebugLog(@"changed to device=%d; mode=%d", device, mode);
 
 	if (device == CAMERA_DEVICE_FRONT) {
-		DebugLog(@"showing FCUM button");
+		DebugLog(@"showing button");
 		unMirrorButton.hidden = NO;
 	} else {
-		DebugLog(@"hiding FCUM button");
+		DebugLog(@"hiding+deselecting button");
 		unMirrorButton.hidden = YES;
 		unMirrorButton.selected = NO;
 	}
 
-	[self _fcum_updatePreviewTransformation];
+	[self fcum_updatePreviewTransformation];
 }
 
 %new
-- (void)_fcum_updatePreviewTransformation {
+- (void)fcum_updatePreviewTransformation {
+	DebugLog0;
+
 	CGAffineTransform newTransform;
 
 	if (unMirrorButton.selected) {
@@ -345,7 +337,6 @@ static BOOL isUsingFrontCamera(id cameraView) {
 
 	if (self._previewViewController) {
 		CAMPreviewView *view = [self._previewViewController previewView];
-		DebugLog(@"CAMPrevieWView=%@", view);
 		if (view) {
 			view.transform = newTransform;
 		}
@@ -354,7 +345,7 @@ static BOOL isUsingFrontCamera(id cameraView) {
 
 %end
 
-%end //grp
+%end
 
 
 //------------------------------------------------------------------------------
@@ -362,20 +353,20 @@ static BOOL isUsingFrontCamera(id cameraView) {
 
 %ctor {
 	@autoreleasepool {
-		loadSettings();
-		NSLog(@"FCUM baby! (%@)", isEnabled?@"Enabled":@"Disabled");
+		NSLog(@"FCUM baby!");
 
-		if (isEnabled) {
-			if (IS_IOS9) {
-				NSLog(@"FCUM: init for iOS 9+");
-				%init(iOS_9);
-			} else {
-				NSLog(@"FCUM: init for iOS 7/8");
-				%init(iOS_7_8);
-				if (IS_IOS7) {
-					%init(iOS_7);
-				}
-			}
+		loadSettings();
+
+		if (!isEnabled) {
+			NSLog(@"FCUM is disabled.");
+			return;
+		}
+
+		if (IS_AT_LEAST_IOS9) {
+			%init(iOS_9);
+		} else {
+			%init(iOS_7_8);
+			if (IS_IOS7) %init(iOS_7);
 		}
 	}
 }

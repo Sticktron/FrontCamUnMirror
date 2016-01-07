@@ -6,18 +6,21 @@
 //
 //
 
-#define DEBUG_PREFIX @"••••• [FCUM Settings]"
+#define DEBUG_PREFIX @"•• [FCUM Settings]"
 #import "../DebugLog.h"
 
 #import <Preferences/PSListController.h>
+#import <Preferences/PSSpecifier.h>
 #import <Preferences/PSTableCell.h>
 #import <Preferences/PSSwitchTableCell.h>
 #import <Social/Social.h>
 #import <spawn.h>
 
 
-#define TINT_COLOR			[UIColor colorWithRed:0.5 green:0 blue:1 alpha:1]
 #define BUNDLE_PATH			@"/Library/PreferenceBundles/FrontCamUnMirror.bundle/"
+#define PREFS_PLIST_PATH	[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Preferences/com.sticktron.fcum.plist"]
+
+#define TINT_COLOR			[UIColor colorWithRed:0 green:0 blue:0 alpha:1]
 
 
 @interface FCUMSettingsController: PSListController
@@ -33,29 +36,32 @@
 	return _specifiers;
 }
 
+- (id)readPreferenceValue:(PSSpecifier*)specifier {
+	NSDictionary *settings = [NSDictionary dictionaryWithContentsOfFile:PREFS_PLIST_PATH];
+	if (!settings[specifier.properties[@"key"]]) {
+		return specifier.properties[@"default"];
+	}
+	return settings[specifier.properties[@"key"]];
+}
+
+- (void)setPreferenceValue:(id)value specifier:(PSSpecifier*)specifier {
+	NSMutableDictionary *settings = [NSMutableDictionary dictionary];
+	[settings addEntriesFromDictionary:[NSDictionary dictionaryWithContentsOfFile:PREFS_PLIST_PATH]];
+	[settings setObject:value forKey:specifier.properties[@"key"]];
+	[settings writeToFile:PREFS_PLIST_PATH atomically:NO]; //sandbox issue if atomic
+
+	NSString *notificationValue = specifier.properties[@"PostNotification"];
+	if (notificationValue) {
+		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFStringRef(notificationValue), NULL, NULL, YES);
+	}
+}
+
 - (void)setTitle:(id)title {
 	// no thanks
 }
 
-- (void)viewDidLoad {
-	[super viewDidLoad];
-
-	// add a heart button to the navbar
-	NSString *path = [BUNDLE_PATH stringByAppendingPathComponent:@"Heart.png"];
-	UIImage *heartImage = [[UIImage alloc] initWithContentsOfFile:path];
-
-	UIBarButtonItem *heartButton = [[UIBarButtonItem alloc] initWithImage:heartImage
-																	style:UIBarButtonItemStylePlain
-																   target:self
-																   action:@selector(showLove)];
-	heartButton.imageInsets = (UIEdgeInsets){2, 0, -2, 0};
-	heartButton.tintColor = TINT_COLOR;
-
-	[self.navigationItem setRightBarButtonItem:heartButton];
-}
-
 - (void)openEmail {
-	NSString *url = @"mailto:sticktron@hotmail.com";
+	NSString *url = @"mailto:sticktron@hotmail.com?subject=FrontCamUnMirror%20Support";
 	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
 }
 
@@ -86,17 +92,6 @@
 	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
 }
 
-- (void)showLove {
-	SLComposeViewController *composeController = [SLComposeViewController
-												  composeViewControllerForServiceType:SLServiceTypeTwitter];
-
-	[composeController setInitialText:@"I'm using #FrontCamUnMirror by @Sticktron and I like it!"];
-
-	[self presentViewController:composeController
-					   animated:YES
-					 completion:nil];
-}
-
 - (void)respring {
 	NSLog(@"FCUM called for a respring!");
 
@@ -116,7 +111,7 @@
 
 - (void)respringNow {
 	pid_t pid;
-	const char* args[] = { "killall", "-9", "backboardd", NULL };
+	const char* args[] = { "killall", "-9", "SpringBoard", NULL };
 	posix_spawn(&pid, "/usr/bin/killall", NULL, NULL, (char* const*)args, NULL);
 }
 
@@ -169,7 +164,7 @@
 	if (self) {
 		self.backgroundColor = UIColor.clearColor;
 
-		NSString *path = [BUNDLE_PATH stringByAppendingPathComponent:@"Title.png"];
+		NSString *path = [BUNDLE_PATH stringByAppendingPathComponent:@"logo.png"];
 		UIImage *titleImage = [UIImage imageWithContentsOfFile:path];
 
 		UIImageView *titleImageView = [[UIImageView alloc] initWithImage:titleImage];
