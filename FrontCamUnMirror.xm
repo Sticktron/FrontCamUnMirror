@@ -12,8 +12,22 @@
 
 #define DEBUG_PREFIX @"••••• [FCUM]"
 #import "DebugLog.h"
-#import "FrontCamUnMirror.h"
 
+#import "Headers.h"
+
+#ifndef kCFCoreFoundationVersionNumber_iOS_8_0
+#define kCFCoreFoundationVersionNumber_iOS_8_0 1140.10
+#endif
+
+#ifndef kCFCoreFoundationVersionNumber_iOS_9_0
+#define kCFCoreFoundationVersionNumber_iOS_9_0 1240.10
+#endif
+
+#define IS_IOS7 (kCFCoreFoundationVersionNumber < kCFCoreFoundationVersionNumber_iOS_8_0)
+#define IS_IOS8 ((kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_8_0) && (kCFCoreFoundationVersionNumber < kCFCoreFoundationVersionNumber_iOS_9_0))
+#define IS_AT_LEAST_IOS9 (kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_9_0)
+
+//#define IS_IPAD (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) //defined by Theos now
 
 #define CAMERA_DEVICE_REAR		0
 #define CAMERA_DEVICE_FRONT		1
@@ -33,6 +47,9 @@
 #define PREFS_PLIST_PATH		[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Preferences/com.sticktron.fcum.plist"]
 
 
+//------------------------------------------------------------------------------
+
+
 @interface CAMTopBar (FCUM)
 - (BOOL)fcum_isUsingFrontCamera;
 - (void)fcum_unMirrorButtonPressed;
@@ -48,9 +65,11 @@
 @end
 
 
+//------------------------------------------------------------------------------
+
+
 static BOOL isEnabled = YES;
 static UIButton *unMirrorButton = nil;
-
 
 static void loadSettings() {
 	DebugLogC(@"loading settings");
@@ -61,11 +80,12 @@ static void loadSettings() {
 		DebugLogC(@"found settings: %@", settings);
 		isEnabled = [settings[@"isEnabled"] boolValue];
 	} else {
-		DebugLogC(@"no settings.");
+		DebugLogC(@"no user settings.");
 	}
 }
 
 
+//------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 
 
@@ -225,7 +245,7 @@ static void loadSettings() {
 	unMirrorButton.userInteractionEnabled = YES;
 	unMirrorButton.selected = NO;
 	unMirrorButton.hidden = YES;
-
+	
 	unMirrorButton.titleLabel.textAlignment = NSTextAlignmentCenter;
 	unMirrorButton.titleLabel.lineBreakMode = NSLineBreakByWordWrapping;
 	unMirrorButton.titleLabel.numberOfLines = 2;
@@ -258,22 +278,18 @@ static void loadSettings() {
 	%orig;
 
 	// update position
-	if (self.shutterButton && self.imageWell) {
-		unMirrorButton.center = self.shutterButton.center;
-		//unMirrorButton.center = self.imageWell.center;
-
-		CGRect shutterFrame = self.shutterButton.frame;
-		CGRect frame = unMirrorButton.frame;
+	if (self.shutterButton) {
+		CGPoint center = self.shutterButton.center;
 
 		if (IS_IPAD) {
 			// put button on top of shutter
-			frame.origin.y = shutterFrame.origin.y - shutterFrame.size.height - 20;
+			center.y -= 70;
 		} else {
 			// put button beside shutter
-			frame.origin.x = shutterFrame.origin.x + shutterFrame.size.width + 20;
+			center.x += 70;
 		}
 
-		unMirrorButton.frame = frame;
+		unMirrorButton.center = center;
 	}
 
 	// update orientation
@@ -287,8 +303,11 @@ static void loadSettings() {
 	DebugLog0;
 
 	unMirrorButton.selected = !unMirrorButton.selected;
-
-	if (self.visibilityDelegate) {
+	
+	if ([self respondsToSelector:@selector(visibilityUpdateDelegate)]) { //iOS 9.3
+		[self.visibilityUpdateDelegate fcum_updatePreviewTransformation];
+	
+	} else if ([self respondsToSelector:@selector(visibilityDelegate)]) {
 		[self.visibilityDelegate fcum_updatePreviewTransformation];
 	}
 }

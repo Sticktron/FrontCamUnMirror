@@ -1,5 +1,5 @@
 //
-//  FCUMSettings.xm
+//  FCUMSettings.mm
 //  FrontCamUnMirror Settings
 //
 //  Copyright (C) 2014-2016 Sticktron. All rights reserved.
@@ -17,7 +17,7 @@
 #import <spawn.h>
 
 
-#define BUNDLE_PATH			@"/Library/PreferenceBundles/FrontCamUnMirror.bundle/"
+#define BUNDLE_PATH			@"/Library/PreferenceBundles/FrontCamUnMirror.bundle"
 #define PREFS_PLIST_PATH	[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Preferences/com.sticktron.fcum.plist"]
 
 #define TINT_COLOR			[UIColor colorWithRed:0 green:0 blue:0 alpha:1]
@@ -52,7 +52,7 @@
 
 	NSString *notificationValue = specifier.properties[@"PostNotification"];
 	if (notificationValue) {
-		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFStringRef(notificationValue), NULL, NULL, YES);
+		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), (CFStringRef)notificationValue, NULL, NULL, YES);
 	}
 }
 

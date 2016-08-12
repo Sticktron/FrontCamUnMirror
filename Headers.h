@@ -1,24 +1,12 @@
 //
-//  FrontCamUnMirror.h
+//  Headers.h
 //  FrontCamUnMirror
 //
-
-#ifndef kCFCoreFoundationVersionNumber_iOS_8_0
-#define kCFCoreFoundationVersionNumber_iOS_8_0 1140.10
-#endif
-
-#ifndef kCFCoreFoundationVersionNumber_iOS_9_0
-#define kCFCoreFoundationVersionNumber_iOS_9_0 1240.10
-#endif
-
-#define IS_IOS7 (kCFCoreFoundationVersionNumber < kCFCoreFoundationVersionNumber_iOS_8_0)
-#define IS_IOS8 ((kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_8_0) && (kCFCoreFoundationVersionNumber < kCFCoreFoundationVersionNumber_iOS_9_0))
-#define IS_AT_LEAST_IOS9 (kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_9_0)
-
-#define IS_IPAD (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+//  Private Apple interfaces.
+//
 
 
-/* iOS 7/8 */
+/* iOS 7 and 8 */
 
 @interface CAMTopBar : UIView
 - (id)delegate;
@@ -58,8 +46,9 @@
 @interface CAMBottomBar : UIView
 @property (nonatomic, retain) CAMImageWell *imageWell;
 @property (nonatomic, retain) CUShutterButton *shutterButton;
-- (id)visibilityDelegate;
 - (void)_commonCAMBottomBarInitialization;
+- (id)visibilityDelegate; // iOS 9.0.x
+- (id)visibilityUpdateDelegate; // newer
 @end
 
 @interface CAMPreviewView : UIView
@@ -70,8 +59,8 @@
 @end
 
 @interface CAMViewfinderViewController : UIViewController
-@property (nonatomic, assign) int _currentMode;                                                                                                                                     //@synthesize _currentMode=__currentMode - In the implementation block
-@property (nonatomic, assign) int _currentDevice;                                                                                                                                 //@synthesize _currentDevice=__currentDevice - In the implementation block
+@property (nonatomic, assign) int _currentMode;
+@property (nonatomic, assign) int _currentDevice;
 - (CAMPreviewViewController *)_previewViewController;
 - (void)_didChangeToMode:(int)arg1 device:(int)arg2 shouldProcessIdenticalChanges:(char)arg3;
 @end

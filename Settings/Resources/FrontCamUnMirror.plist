@@ -62,7 +62,7 @@
 			<key>cellClass</key>
 			<string>FCUMButtonCell</string>
 			<key>label</key>
-			<string>sticktron@hotmail.com</string>
+			<string>Email me</string>
 			<key>icon</key>
 			<string>email.png</string>
 			<key>action</key>
@@ -76,7 +76,7 @@
 			<key>cellClass</key>
 			<string>FCUMButtonCell</string>
 			<key>label</key>
-			<string>@Sticktron</string>
+			<string>Find me on Twitter</string>
 			<key>icon</key>
 			<string>twitter.png</string>
 			<key>action</key>

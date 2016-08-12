@@ -1,10 +1,13 @@
 #!/bin/bash
 make clean
 
-echo "removing Packages"
-echo "removing .theos"
+echo "deleting packages"
+rm -rf packages
 
-rm -rf Packages
+echo "deleting obj"
+rm -rf obj
+
+echo "deleting .theos"
 rm -rf .theos
 rm -rf Settings/.theos
 
