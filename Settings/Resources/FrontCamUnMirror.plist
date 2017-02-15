@@ -14,8 +14,8 @@
 			<string>PSGroupCell</string>
 			<key>headerCellClass</key>
 			<string>FCUMTitleCell</string>
-			<key>footerText</key>
-			<string>⚠️ Respring to apply changes</string>
+			<!-- <key>footerText</key>
+			<string>⚠️ Respring to apply changes</string> -->
 		</dict>
 
 		<!-- Enabled Switch -->
@@ -38,16 +38,14 @@
 		<dict>
 			<key>cell</key>
 			<string>PSButtonCell</string>
-			<key>cellClass</key>
-			<string>FCUMButtonCell</string>
 			<key>label</key>
-			<string>Restart SpringBoard</string>
+			<string>Apply</string>
 			<key>action</key>
 			<string>respring</string>
 		</dict>
 
 
-		<!-- [] Contact -->
+		<!-- [] Support -->
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
@@ -58,13 +56,13 @@
 		<!-- Email Button -->
 		<dict>
 			<key>cell</key>
-			<string>PSButtonCell</string>
+			<string>PSLinkCell</string>
 			<key>cellClass</key>
 			<string>FCUMButtonCell</string>
 			<key>label</key>
-			<string>Email me</string>
+			<string>Send Email</string>
 			<key>icon</key>
-			<string>email.png</string>
+			<string>Email.png</string>
 			<key>action</key>
 			<string>openEmail</string>
 		</dict>
@@ -72,54 +70,51 @@
 		<!-- Twitter Button -->
 		<dict>
 			<key>cell</key>
-			<string>PSButtonCell</string>
+			<string>PSLinkCell</string>
 			<key>cellClass</key>
 			<string>FCUMButtonCell</string>
 			<key>label</key>
-			<string>Find me on Twitter</string>
+			<string>Tweet @sticktron</string>
 			<key>icon</key>
-			<string>twitter.png</string>
+			<string>Twitter.png</string>
 			<key>action</key>
 			<string>openTwitter</string>
 		</dict>
 
 
-		<!-- [] Source Code -->
+		<!-- [] Links -->
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
-			<key>label</key>
-			<string>Source Code</string>
 		</dict>
+		
+		<!-- Source Code -->
 		<dict>
 			<key>cell</key>
-			<string>PSButtonCell</string>
+			<string>PSLinkCell</string>
 			<key>cellClass</key>
 			<string>FCUMButtonCell</string>
 			<key>label</key>
-			<string>Available on GitHub.com</string>
+			<string>Source Code</string>
 			<key>icon</key>
-			<string>github.png</string>
+			<string>GitHub.png</string>
 			<key>action</key>
 			<string>openGitHub</string>
 		</dict>
-
-
-		<!-- [] Credits -->
+		
+		<!-- [] FOOTER -->
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>footerAlignment</key>
 			<integer>1</integer>
 			<key>footerText</key>
-			<string>Copyright © 2014-2016 Sticktron.
+			<string>© 2014-2017 Sticktron
 
-😈
-
-</string>
+😈</string>
 		</dict>
-
-
+	
+	
 	</array>
 </dict>
 </plist>

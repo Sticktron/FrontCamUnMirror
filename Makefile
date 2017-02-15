@@ -1,5 +1,5 @@
 ARCHS = armv7 arm64
-TARGET = iphone:clang:latest:7.0
+TARGET = iphone:clang:10.2:7.0
 
 include $(THEOS)/makefiles/common.mk
 
@@ -13,9 +13,6 @@ include $(THEOS_MAKE_PATH)/tweak.mk
 SUBPROJECTS += Settings
 include $(THEOS_MAKE_PATH)/aggregate.mk
 
-# Theos takes care of these now:
-#find $(FW_STAGING_DIR) -iname '*.plist' -or -iname '*.strings' -exec plutil -convert binary1 {} \;
-#find $(FW_STAGING_DIR) -iname '*.png' -exec pincrush-osx -i {} \;
 after-stage::
 	find $(FW_STAGING_DIR) -name '.DS_STORE' -exec rm {} \;
 
