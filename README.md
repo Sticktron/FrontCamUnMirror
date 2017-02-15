@@ -10,9 +10,9 @@ This tweak adds an un-mirror button to the toolbar when using the front-facing c
 
 ### Device Compatibility
 
-* iPhone/iPod: iOS 7 - 9.
-* iPad: iOS 9.
+* iPhone/iPod: iOS 7-10.
+* iPad: iOS 9-10.
 
 Thanks to the /r/jailbreak community for the idea and testing.
 
-Copyright (C) 2014-2016 Sticktron. All rights reserved.
+Copyright (C) 2014-2017 Sticktron. All rights reserved.
