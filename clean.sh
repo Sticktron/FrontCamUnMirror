@@ -1,13 +1,11 @@
 #!/bin/bash
+
+echo "Cleaning up build scraps..."
+
 make clean
 
-echo "deleting packages"
-rm -rf packages
-
-echo "deleting obj"
 rm -rf obj
-
-echo "deleting .theos"
+rm -rf packages
 rm -rf .theos
 rm -rf Settings/.theos
 
