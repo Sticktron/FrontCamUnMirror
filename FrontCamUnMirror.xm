@@ -195,7 +195,7 @@ static void loadSettings() {
 	DebugLog0;
 
 	// iOS 7 doesn't call layoutSubviews as often as iOS 8 when changing
-	// camera modes, so let's call it layoutSubviews manually here.
+	// camera modes, so let's call it manually here.
 	[self._topBar layoutSubviews];
 
 	return %orig;
@@ -346,6 +346,30 @@ static void loadSettings() {
 
 static CAMPreviewViewController *previewViewController;
 
+// Create a new transformation matrix based on the state of the FCUM
+// button and the current device orientation.
+static CGAffineTransform makeNewTransform() {
+	DebugLogC(@"calculating new transform matrix...");
+	
+	CGAffineTransform newTransform;
+	
+	if (unMirrorButton.selected) {
+		UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+		if (orientation == UIDeviceOrientationLandscapeLeft || orientation == UIDeviceOrientationLandscapeRight) {
+			newTransform = TRANSFORM_FLIP_V; // landscape gets a vertical flip
+		} else {
+			newTransform = TRANSFORM_FLIP_H; // portrait gets a horizontal flip
+		}
+		DebugLogC(@"Un-mirrored. Set new transform: %@", NSStringFromCGAffineTransform(newTransform));
+	} else {
+		// return to normal
+		newTransform = CGAffineTransformIdentity;
+		DebugLogC(@"Not un-mirrored. Set identity transform: Identity");
+	}
+	
+	return newTransform;
+}
+
 %group iOS_10
 
 %hook CAMBottomBar
@@ -369,11 +393,6 @@ static CAMPreviewViewController *previewViewController;
 		center.x -= 55;
 		center.y += 2;
 		unMirrorButton.center = center;
-	}
-	
-	// update orientation
-	if (self.imageWell && self.imageWell._thumbnailImageView) {
-		unMirrorButton.transform = self.imageWell._thumbnailImageView.transform;
 	}
 }
 %new
@@ -426,54 +445,61 @@ static CAMPreviewViewController *previewViewController;
 
 %hook CAMPreviewViewController
 - (void)viewDidLoad {
-	DebugLog0;
 	%orig;
 	previewViewController = self;
 }
 - (void)willChangeToMode:(int)mode device:(int)device {
-	DebugLog(@"changed to device=%d; mode=%d", device, mode);
-	%orig;
+	DebugLog(@"changing to device=%d; mode=%d", device, mode);
 	
-	if (device == CAMERA_DEVICE_FRONT) {
+	if ((device == CAMERA_DEVICE_FRONT) && ((mode == CAMERA_MODE_PHOTO) || (mode == CAMERA_MODE_VIDEO) || (mode == CAMERA_MODE_SQUARE))) {
 		DebugLog(@"showing button");
 		unMirrorButton.hidden = NO;
-		
-		// Changing camera modes resets the preview to normal (not un-mirrored),
-		// so turn off the button if it was previously on.
-		unMirrorButton.selected = NO;
+		// unMirrorButton.selected = NO;
 	} else {
 		DebugLog(@"hiding button");
 		unMirrorButton.hidden = YES;
 		unMirrorButton.selected = NO;
 	}
+	
+	%orig;
+}
+- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)orientation duration:(NSTimeInterval)duration {
+	float rotation;
+	
+	if (orientation == UIInterfaceOrientationPortrait) {
+		rotation = 0;
+	} else if (orientation == UIInterfaceOrientationLandscapeLeft) {
+		rotation = -M_PI/2;
+	} else if (orientation == UIInterfaceOrientationLandscapeRight) {
+		rotation = M_PI/2;
+	} else { // updside down
+		rotation = M_PI;
+	}
+	
+    [UIView animateWithDuration: duration
+                          delay: 0
+                        options: UIViewAnimationOptionCurveLinear
+                     animations: ^(void) {
+						 unMirrorButton.transform = CGAffineTransformMakeRotation(rotation);
+                     }
+                     completion: nil];
 }
 %new
 - (void)fcum_updatePreviewTransformation {
 	DebugLog0;
-
-	CGAffineTransform newTransform;
-
-	if (unMirrorButton.selected) {
-		UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
-		if (orientation == UIDeviceOrientationLandscapeLeft || orientation == UIDeviceOrientationLandscapeRight) {
-			// landscape gets a vertical flip
-			newTransform = TRANSFORM_FLIP_V;
-		} else {
-			// portrait gets a horizontal flip
-			newTransform = TRANSFORM_FLIP_H;
-		}
-		DebugLog(@"Un-mirrored. Set new transform: %@", NSStringFromCGAffineTransform(newTransform));
-	} else {
-		// return to normal
-		newTransform = CGAffineTransformIdentity;
-		DebugLog(@"Not un-mirrored. Apply identity transform");
-	}
-	
 	CAMPreviewView *view = self.previewView;
 	if (view) {
-		DebugLog(@"setting new transform.");
-		view.transform = newTransform;
+		// Doesn't matter what value we set here, the appropriate value will be
+		// determined by the hook on setTransform, we just need to get it to run.
+		view.transform = CGAffineTransformMake(1, 2, 3, 4, 5, 6);
 	}
+}
+%end
+
+%hook CAMPreviewView
+- (void)setTransform:(CGAffineTransform)arg1 {
+	DebugLog0;
+	%orig(makeNewTransform());
 }
 %end
 
